@@ -10,8 +10,6 @@ exports.campgroundApiKey = "qtbv6jbcw5n2u9zdm9559nd5";
 var campgroundApiKey = require('./../.env').campgroundApiKey;
 var cityObj;
 var campgrounds;
-// response.resultset.result[i].@attributes.latitude
-// response.resultset.result[i].@attributes.longitude
 
 $(document).ready(function() {
 var map;
@@ -20,8 +18,12 @@ var service;
 var markers = [];
 
 
+$('li').click(function() {
+  console.log($(this).attr("id"));
+});
+
 function initialize() {
-  var latlon = new google.maps.LatLng(45.5231, -122.6765);
+  var latlon = new google.maps.LatLng(45.523, -122.675);
   mapCanvas = document.getElementById('map');
 
 
@@ -57,20 +59,60 @@ function callback(results) {
   }
 }
 
+function checkYorN(string) {
+  if(string === "Y") {
+    return "Yes";
+  } else {
+    return "No";
+  }
+}
 function createMarker(place) {
+  var contentString =
+  '<div id="content">'+
+    '<div id="siteNotice">'+
+    '</div>'+
+    '<h1 id="firstHeading" class="firstHeading">'+place.attributes.facilityName+'</h1>'+
+    '<div id="bodyContent">'+
+      '<p>Availability: ' + checkYorN(place.attributes.availabilityStatus)+ '</p>'+
+      '<p>Type: ' + place.attributes.contractType+ '</p>'+
+      '<p>Amp Hookups: ' + checkYorN(place.attributes.sitesWithAmps) + '</p>'+
+      '<p>Pets: ' + checkYorN(place.attributes.sitesWithPetsAllowed) + '</p>'+
+      '<p>Sewer Hookup: ' + checkYorN(place.attributes.sitesWithSewerHookup) + '</p>'+
+      '<p>Water: ' + checkYorN(place.attributes.sitesWithWaterHookup) + '</p>'+
+      '<p>Waterfront Spots: ' + place.attributes.sitesWithWaterfront + '</p>'
+    +'</div>'+
+  '</div>';
+
   console.log(place.attributes.facilityName);
   var placeLoc = new google.maps.LatLng(place.attributes.latitude, place.attributes.longitude);
   var marker = new google.maps.Marker({
     map: map,
-    position:  placeLoc
+    position:  placeLoc,
+    icon: image,
+    animation: google.maps.Animation.DROP
   });
   markers.push(marker);
 
   google.maps.event.addListener(marker, 'click', function() {
-    infowindow.setContent(place.attributes.facilityName);
+    infowindow.setContent(contentString);
     infowindow.open(map, this);
+    if (marker.getAnimation() !== null) {
+      marker.setAnimation(null);
+    } else {
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+    }
+
   });
 }
+
+var image = { url: '/../img/marsh.png',
+size: new google.maps.Size(32, 32),
+// The origin for this image is (0, 0).
+origin: new google.maps.Point(0, 0),
+// The anchor for this image is the base of the flagpole at (0, 32).
+anchor: new google.maps.Point(0, 32)
+};
+
 
 function createCityMarker(lat, long) {
   // alert("createMarker function");
@@ -86,6 +128,7 @@ function createCityMarker(lat, long) {
     infowindow.open(map, this);
   });
 }
+
 
 
 google.maps.event.addDomListener(window, 'load', initialize);
@@ -128,10 +171,12 @@ function xmlToJson(xml) {
 };
 
 function getCampground (lat, lng) {
-  $.get('http://api.amp.active.com/camping/campgrounds?landmarkName=true&landmarkLat='+ lat + '&landmarkLong='+ lng + '&xml=true&api_key=' + campgroundApiKey, function(response) {
+  $.get('http://api.amp.active.com/camping/campgrounds?landmarkName=true&landmarkLat='+ lat + '&landmarkLong='+ lng + '&xml=true&api_key=' + campgroundApiKey).then(function(response) {
     campgrounds = xmlToJson(response);
     callback(campgrounds);
     //serve to google function
+  }).then(function() {
+    listCampgrounds(campgrounds);
   });
 }
 
@@ -147,6 +192,30 @@ function getCity (city, state, getCampground) {
 }
 
 
+
+function listCampgrounds(camps) {
+  $("ol").empty()
+  for (var i = 0; i < camps.resultset.result.length; i++) {
+    $('#campground-results').append(
+      '<li>'+
+      '<button id="testing" data-lat="'+camps.resultset.result[i].attributes.latitude+'" data-lon="'+camps.resultset.result[i].attributes.longitude+'" class="campground-button" type="button">' + camps.resultset.result[i].attributes.facilityName + '</button>'
+      +'</li>'
+    );
+  }
+}
+
+function navigateToCamp(lat, lon) {
+  var latlong = new google.maps.LatLng(lat, lon)
+  map.setCenter(latlong);
+  return false;
+}
+
+$('body').on('click', 'button.campground-button', function() {
+  var lat = $(this).attr("data-lat");
+  var long = $(this).attr("data-lon");
+  navigateToCamp(lat, long);
+
+});
 
 
   $("#getCampground").click(function() {

@@ -6,3 +6,8 @@ html, body {
 #map {
   height: 50%;
 }
+
+.scrollable {
+    height: 50%; 
+    overflow-y: auto;
+}

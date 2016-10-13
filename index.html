@@ -12,11 +12,19 @@
     <!-- <button type="button" id="test" name="button">test</button> -->
 
     <div id="map"></div>
+    <hr>
+    <h3>View Potential Campsites Below!</h3>
+    
     <div class="">
       <label for="location">Enter a location:</label>
       <input id="city" type="text" placeholder="city">
       <input id="state" type="text" placeholder="state">
       <button class="btn-success" id="getCampground">Get Campsites!</button>
+    </div>
+    <div class="campgrounds scrollable">
+      <ol id="campground-results">
+
+      </ol>
     </div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAVgscJ8HieO8b5zNOiiog5cKMFXHhlirQ&libraries=places"
     async defer></script>

@@ -1,0 +1,14 @@
+'<div id="content">'+
+  '<div id="siteNotice">'+
+  '</div>'+
+  '<h1 id="firstHeading" class="firstHeading">'+place.attributes.facilityName+'</h1>'+
+  '<div id="bodyContent">'+
+    '<p>Availability: ' + place.attributes.availabilityStatus+ '</p>'+
+    '<p>Type: ' + place.attributes.contractType+ '</p>'+
+    '<p>Amp Hookups: ' + place.attributes.sitesWithAmps + '</p>'+
+    '<p>Pets: ' + place.attributes.sitesWithPetsAllowed + '</p>'+
+    '<p>Sewer Hookup: ' + place.attributes.sitesWithSewerHookup + '</p>'+
+    '<p>Water: ' + place.attributes.sitesWithWaterHookup + '</p>'+
+    '<p>Waterfront Spots: ' + place.attributes.sitesWithWaterfront + '</p>'
+  +'</div>'+
+'</div>';
