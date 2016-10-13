@@ -31,13 +31,6 @@ function initialize() {
     zoom: 15
   });
 
-  // var currentMarker = new google.maps.Marker({
-	//     map: map,
-	//     position: latlon,
-	//     title:'Current Location'
-	//   });
-
-
   infowindow = new google.maps.InfoWindow();
   service = new google.maps.places.PlacesService(map);
 
@@ -55,6 +48,7 @@ function setMapOnAll(map) {
 }
 
 function callback(results) {
+  console.log(results);
   clearMarkers();
   // if (status == google.maps.places.PlacesServiceStatus.OK) {
     for (var i = 0; i < results.resultset.result.length; i++) {
@@ -64,6 +58,7 @@ function callback(results) {
 }
 
 function createMarker(place) {
+  console.log(place.attributes.facilityName);
   var placeLoc = new google.maps.LatLng(place.attributes.latitude, place.attributes.longitude);
   var marker = new google.maps.Marker({
     map: map,
@@ -72,7 +67,7 @@ function createMarker(place) {
   markers.push(marker);
 
   google.maps.event.addListener(marker, 'click', function() {
-    // infowindow.setContent(place.name);
+    infowindow.setContent(place.attributes.facilityName);
     infowindow.open(map, this);
   });
 }
@@ -154,13 +149,13 @@ function getCity (city, state, getCampground) {
 
 
 
-  $("#test").click(function() {
+  $("#getCampground").click(function() {
     var city = $("#city").val();
     var state = $("#state").val();
     cityObj = getCity(city, state, getCampground);
   });
 
-  $("#getCampground").click(function() {
+  $("#test").click(function() {
   });
 
 });
