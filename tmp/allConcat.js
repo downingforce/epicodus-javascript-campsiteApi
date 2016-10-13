@@ -8,6 +8,7 @@ $(document).ready(function() {
 var map;
 var infowindow;
 var service;
+var markers = [];
 
 
 function initialize() {
@@ -21,23 +22,12 @@ function initialize() {
     zoom: 15
   });
 
-  var currentMarker = new google.maps.Marker({
-	    map: map,
-	    position: latlon,
-	    title:'Current Location'
-	  });
+  // var currentMarker = new google.maps.Marker({
+	//     map: map,
+	//     position: latlon,
+	//     title:'Current Location'
+	//   });
 
-  var request = {
-    location: latlon,
-    radius: 5000,
-    types: ['food']
-  };
-
-  var request2 = {
-    location: latlon,
-    radius: 5000,
-    types: ['atm']
-  };
 
   infowindow = new google.maps.InfoWindow();
   service = new google.maps.places.PlacesService(map);
@@ -45,8 +35,18 @@ function initialize() {
 
 
 }
+function clearMarkers() {
+  setMapOnAll(null);
+}
+
+function setMapOnAll(map) {
+  for (var i = 0; i < markers.length; i++) {
+    markers[i].setMap(map);
+  }
+}
 
 function callback(results) {
+  clearMarkers();
   // if (status == google.maps.places.PlacesServiceStatus.OK) {
     for (var i = 0; i < results.resultset.result.length; i++) {
       createMarker(results.resultset.result[i]);
@@ -55,18 +55,34 @@ function callback(results) {
 }
 
 function createMarker(place) {
-  var placeLoc = new google.maps.LatLng(place.attributes.latitude, place.attributes.longitude);;
-  console.log(placeLoc);
+  var placeLoc = new google.maps.LatLng(place.attributes.latitude, place.attributes.longitude);
   var marker = new google.maps.Marker({
     map: map,
     position:  placeLoc
   });
+  markers.push(marker);
 
   google.maps.event.addListener(marker, 'click', function() {
     // infowindow.setContent(place.name);
     infowindow.open(map, this);
   });
 }
+
+function createCityMarker(lat, long) {
+  // alert("createMarker function");
+  var placeLoc = new google.maps.LatLng(lat, long);
+  var marker = new google.maps.Marker({
+    map: map,
+    position:  new google.maps.LatLng(lat, long)
+  });
+  map.setCenter(placeLoc);
+
+  google.maps.event.addListener(marker, 'click', function() {
+    infowindow.setContent(place.name);
+    infowindow.open(map, this);
+  });
+}
+
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
@@ -119,6 +135,7 @@ function getCampground (lat, lng) {
 function getCity (city, state, getCampground) {
   $.get('https://maps.googleapis.com/maps/api/geocode/json?address='+ city + state+'&key=AIzaSyAVgscJ8HieO8b5zNOiiog5cKMFXHhlirQ').then(function(response) {
     cityObj = response;
+    createCityMarker(response.results[0].geometry.location.lat, response.results[0].geometry.location.lng);
     getCampground(response.results[0].geometry.location.lat, response.results[0].geometry.location.lng);
     }).fail(function(error) {
       $('.showWeather').text(error.responseJSON.message);
