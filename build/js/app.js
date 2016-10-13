@@ -10,6 +10,8 @@ exports.campgroundApiKey = "qtbv6jbcw5n2u9zdm9559nd5";
 var campgroundApiKey = require('./../.env').campgroundApiKey;
 var cityObj;
 var campgrounds;
+// response.resultset.result[i].@attributes.latitude
+// response.resultset.result[i].@attributes.longitude
 
 $(document).ready(function() {
 var map;
@@ -47,29 +49,30 @@ function initialize() {
   };
 
   infowindow = new google.maps.InfoWindow();
-  var service = new google.maps.places.PlacesService(map);
+  service = new google.maps.places.PlacesService(map);
+
 
 
 }
 
-
-function callback(results, status) {
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i = 0; i < results.length; i++) {
-      createMarker(results[i]);
-    }
+function callback(results) {
+  // if (status == google.maps.places.PlacesServiceStatus.OK) {
+    for (var i = 0; i < results.resultset.result.length; i++) {
+      createMarker(results.resultset.result[i]);
+    // }
   }
 }
 
 function createMarker(place) {
-  var placeLoc = place.geometry.location;
+  var placeLoc = new google.maps.LatLng(place.attributes.latitude, place.attributes.longitude);;
+  console.log(placeLoc);
   var marker = new google.maps.Marker({
     map: map,
-    position:  place.geometry.location
+    position:  placeLoc
   });
 
   google.maps.event.addListener(marker, 'click', function() {
-    infowindow.setContent(place.name);
+    // infowindow.setContent(place.name);
     infowindow.open(map, this);
   });
 }
@@ -83,10 +86,10 @@ function xmlToJson(xml) {
 	if (xml.nodeType == 1) { // element
 		// do attributes
 		if (xml.attributes.length > 0) {
-		obj["@attributes"] = {};
+		obj["attributes"] = {};
 			for (var j = 0; j < xml.attributes.length; j++) {
 				var attribute = xml.attributes.item(j);
-				obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+				obj["attributes"][attribute.nodeName] = attribute.nodeValue;
 			}
 		}
 	} else if (xml.nodeType == 3) { // text
@@ -116,7 +119,8 @@ function xmlToJson(xml) {
 function getCampground (lat, lng) {
   $.get('http://api.amp.active.com/camping/campgrounds?landmarkName=true&landmarkLat='+ lat + '&landmarkLong='+ lng + '&xml=true&api_key=' + campgroundApiKey, function(response) {
     campgrounds = xmlToJson(response);
-    console.log(campgrounds);
+    callback(campgrounds);
+    //serve to google function
   });
 }
 
@@ -133,37 +137,15 @@ function getCity (city, state, getCampground) {
 
 
 
-$("#test").click(function() {
-  var city = $("#city").val();
-  var state = $("#state").val();
-  cityObj = getCity(city, state, getCampground);
-  setTimeout(function(){console.log(campgrounds);},5000);
-});
+  $("#test").click(function() {
+    var city = $("#city").val();
+    var state = $("#state").val();
+    cityObj = getCity(city, state, getCampground);
+  });
 
-$("#getCampground").click(function() {
-  console.log(cityObj);
-  console.log(campgrounds);
-});
+  $("#getCampground").click(function() {
+  });
 
-var someFunction = function(argument, callback) {
-  // get something with argument
-  get().then(function(reponse) {
-    callback(response)
-  })
-}
-
-
-// var doFirstThing = function (argment) {
-//   //do something to get thing back
-//   var thingWeGot = someFunction(argmnet, function(response) {
-//     var otheThing = doSecondThing(thingWeGot);
-//   });
-// }
-// var doSecondThing = function () {}
-// var doThirdThing = function () {}
-//
-//
-//
 });
 
 },{"./../.env":1}]},{},[2]);
